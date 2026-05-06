@@ -107,7 +107,7 @@ mkdir -p ~/codes
 cd ~/codes
 
 if [ ! -d cockpit-tools/.git ]; then
-  git clone https://github.com/MarvekW/cockpit-tools.git cockpit-tools
+  git clone https://github.com/jlcodes99/cockpit-tools.git cockpit-tools
 fi
 
 cd ~/codes/cockpit-tools
@@ -186,13 +186,50 @@ cargo --version
 cd ~/codes/cockpit-tools
 ```
 
-安装前端依赖：
+安装前端依赖。如果已经执行过 `npm ci`，且 `package.json`、`package-lock.json` 没有变化，可以跳过这一步：
 
 ```bash
 npm ci --cache .npm-cache
 ```
 
+如果后续编译提示前端依赖缺失、版本不匹配，或 `package-lock.json` 与 `package.json` 不一致，重新安装依赖：
+
+```bash
+npm install --cache .npm-cache
+```
+
 不要用 `sudo npm ...` 编译项目。`sudo` 可能会切到系统自带的旧 Node.js，导致 Vite 报错。
+
+同步并检查应用版本，确保 `package.json`、`src-tauri/tauri.conf.json`、`src-tauri/Cargo.toml` 版本一致：
+
+```bash
+npm run sync-version
+
+node - <<'NODE'
+const fs = require("fs");
+
+const packageVersion = JSON.parse(fs.readFileSync("package.json", "utf8")).version;
+const tauriVersion = JSON.parse(fs.readFileSync("src-tauri/tauri.conf.json", "utf8")).version;
+const cargoToml = fs.readFileSync("src-tauri/Cargo.toml", "utf8");
+const cargoVersion = cargoToml.match(/^version\s*=\s*"([^"]+)"/m)?.[1];
+
+console.log(`package.json: ${packageVersion}`);
+console.log(`tauri.conf.json: ${tauriVersion}`);
+console.log(`src-tauri/Cargo.toml: ${cargoVersion}`);
+
+if (packageVersion !== tauriVersion || packageVersion !== cargoVersion) {
+  console.error("Version mismatch. Run npm run sync-version, then try building again.");
+  process.exit(1);
+}
+NODE
+```
+
+如果版本已经一致，可以继续编译；如果不一致，先重新执行 `npm run sync-version`，再试一次编译。仍然失败时，先拉取最新代码并重新安装依赖：
+
+```bash
+git pull
+npm install --cache .npm-cache
+```
 
 本地 Ubuntu 24.04 编译时，先临时关闭 Tauri updater artifacts。
 
