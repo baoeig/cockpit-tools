@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Check, Copy, Play, X } from "lucide-react";
+import { Check, ChevronLeft, Copy, Play, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { PlatformInstancesContent } from "../components/platform/PlatformInstancesContent";
 import { SingleSelectDropdown } from "../components/SingleSelectDropdown";
@@ -25,6 +25,7 @@ import {
   findCodexApiProviderPresetById,
   resolveCodexApiProviderPresetId,
 } from "../utils/codexProviderPresets";
+import { useEscClose } from "../hooks/useEscClose";
 
 /**
  * Codex 多开实例内容组件（不包含 header）
@@ -58,13 +59,17 @@ export function CodexInstancesContent({
   const instanceStore = useCodexInstanceStore();
   const { accounts: storeAccounts, fetchAccounts } = useCodexAccountStore();
   const accounts = accountsForSelect ?? storeAccounts;
-  const isSupportedPlatform = usePlatformRuntimeSupport("macos-only");
+  const isMacOS = usePlatformRuntimeSupport("macos-only");
+  const isWindows = usePlatformRuntimeSupport("windows-only");
+  const isSupportedPlatform = isMacOS || isWindows;
   const [showCodeReviewQuota, setShowCodeReviewQuota] = useState<boolean>(
     isCodexCodeReviewQuotaVisibleByDefault,
   );
   const [launchModal, setLaunchModal] = useState<CodexLaunchModalState | null>(
     null,
   );
+
+  useEscClose(!!launchModal, () => setLaunchModal(null));
   const { terminalOptions, selectedTerminal, setSelectedTerminal } =
     useLaunchTerminalOptions(isSupportedPlatform);
 
@@ -304,7 +309,7 @@ export function CodexInstancesContent({
           unsupportedTitleKey="common.shared.instances.unsupported.title"
           unsupportedTitleDefault="暂不支持当前系统"
           unsupportedDescKey="codex.instances.unsupported.desc"
-          unsupportedDescDefault="Codex 多开实例仅支持 macOS。"
+          unsupportedDescDefault="Codex 多开实例仅支持 macOS 和 Windows。"
           onInstanceStarted={handleInstanceStarted}
           resolveStartSuccessMessage={(instance) =>
             (instance.launchMode ?? "app") === "cli"
@@ -321,6 +326,7 @@ export function CodexInstancesContent({
             onClick={(event) => event.stopPropagation()}
           >
             <div className="modal-header">
+              <button className="btn btn-secondary icon-only" onClick={() => setLaunchModal(null)} title={t("common.back", "返回")} aria-label={t("common.back", "返回")}><ChevronLeft size={14} /></button>
               <h2>{t("instances.launchDialog.title", "启动实例")}</h2>
               <button
                 className="modal-close"

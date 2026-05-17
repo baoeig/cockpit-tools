@@ -78,9 +78,10 @@
         "titleCodex": "Codex 批次匯入",
         "statusReceiving": "正在接收匯入請求...",
         "statusFetching": "正在取得匯入包...",
-        "statusParsing": "正在解析 Codex JSON...",
+        "statusParsing": "正在解析 Codex 匯入內容...",
         "statusImporting": "正在匯入第 {{current}} / {{total}} 個帳號",
         "statusRefreshing": "正在重新整理帳號列表...",
+        "statusActivating": "正在切換到匯入帳號...",
         "statusSuccess": "匯入完成",
         "statusPartial": "部分匯入完成",
         "statusFailed": "匯入失敗",
@@ -89,14 +90,19 @@
         "failed": "失敗",
         "stepReceive": "接收匯入請求",
         "stepFetch": "取得匯入包",
-        "stepParse": "解析 Codex JSON",
+        "stepParse": "解析匯入內容",
         "stepImport": "匯入帳號",
         "stepRefresh": "重新整理帳號列表",
         "errorsTitle": "失敗項",
         "viewAccounts": "查看 Codex 帳號",
         "copyErrors": "複製錯誤",
         "copied": "已複製",
-        "unknownItem": "第 {{index}} 個 JSON"
+        "unknownItem": "第 {{index}} 個匯入項目",
+        "versionUnsupportedTitle": "應用程式版本過低",
+        "versionUnsupportedDesc": "暫不支援此方式，請下載最新版。",
+        "checkUpdate": "檢查更新",
+        "rawLineNoRefreshToken": "第 {{line}} 行未匹配到 refresh_token",
+        "rawLineMultipleRefreshTokens": "第 {{line}} 行匹配到多個 refresh_token，請只保留一個"
       },
       "instances": {
         "unsupported": {
@@ -359,7 +365,8 @@
       "instance": "實例",
       "email": "帳號",
       "quota": "額度狀態",
-      "actions": "操作"
+      "actions": "操作",
+      "speed": "速度"
     },
     "empty": {
       "title": "暫無實例",
@@ -437,7 +444,9 @@
           "contextWindowInvalid": "上下文視窗必須是大於 0 的整數",
           "autoCompactInvalid": "自動壓縮閾值必須是大於 0 的整數"
         }
-      }
+      },
+      "appSpeed": "速度",
+      "appSpeedDesc": "啟動官方 Codex 前寫入對應速度"
     },
     "quota": {
       "unbound": "未綁定帳號",
@@ -458,7 +467,8 @@
       "allAlreadyRunning": "所有實例均已在運行中",
       "noneRunning": "未找到正在運行的實例",
       "syncThreadsNeedTwo": "至少需要兩個實例才能同步執行緒",
-      "launchPrepared": "啟動指令已準備"
+      "launchPrepared": "啟動指令已準備",
+      "speedUpdated": "速度已更新"
     },
     "runningDialog": {
       "title": "實例已在運行",
@@ -735,7 +745,14 @@
       "codexSpecifiedAppPath": "指定應用啟動路徑",
       "codexSpecifiedAppPathDesc": "填寫需聯動重啟的應用路徑",
       "codexSpecifiedAppPathPlaceholder": "例如 /Applications/Host.app",
-      "codexSpecifiedAppPathClear": "清空"
+      "codexSpecifiedAppPathClear": "清空",
+      "codexAppSpeed": "Codex 速度",
+      "codexAppSpeedDesc": "儲存為官方 Codex 啟動速度；每次從本應用啟動 Codex 前都會寫入。",
+      "codexAppSpeedStandard": "標準",
+      "codexAppSpeedFast": "快速",
+      "codexAppSpeedLaunch": "重新啟動 Codex",
+      "codexAppSpeedSaveFailed": "儲存 Codex 速度失敗：{{error}}",
+      "codexAppSpeedLaunchFailed": "重新啟動 Codex 失敗：{{error}}"
     },
     "network": {
       "apiTitle": "反重力駕駛艙 API",
@@ -1589,6 +1606,7 @@
     "installFailed": "系統安裝失敗，請稍後重試或手動下載安裝。",
     "restartRequiredAfterInstall": "更新已安裝，請手動重新啟動應用程式完成切換。",
     "stoppingApiService": "正在關閉 API 服務...",
+    "stopApiServiceFailed": "無法關閉 API 服務，請先停用後重試。",
     "skipThisVersion": "跳過此版本",
     "skipFailed": "跳過此更新失敗：{{error}}"
   },
@@ -1610,6 +1628,13 @@
   },
   "codex": {
     "title": "Codex 帳號管理",
+    "newApi": {
+      "quota": {
+        "available": "額度",
+        "unlimited": "不限量",
+        "usedHint": "已用 {{used}}"
+      }
+    },
     "subtitle": "管理您的 OpenAI Codex 帳號",
     "instances": {
       "subtitle": "多實例獨立配置，多帳號並行運行。",
@@ -1674,8 +1699,13 @@
       "timeoutRetry": "更新驗證連結"
     },
     "token": {
-      "desc": "貼上 auth.json 內容或帳號 JSON 資料",
-      "placeholder": "範例：{\"tokens\":{\"id_token\":\"eyJ...\",\"access_token\":\"eyJ...\"}}"
+      "desc": "貼上 auth.json、帳號 JSON 或 refresh_token。",
+      "placeholder": "範例：每行一個 refresh_token，或 {\"refresh_token\":\"rt_...\"}",
+      "formatSummary": "必填欄位與範例（點擊展開）",
+      "formatRequired": "支援完整 tokens（id_token + access_token）、單個 refresh_token，或每行一個 refresh_token。僅 refresh_token 會先連線換取完整憑證。",
+      "formatSingleLabel": "完整 tokens 範例",
+      "formatRefreshOnlyLabel": "僅 refresh_token 範例",
+      "formatBatchLabel": "批次範例"
     },
     "exportFormat": {
       "label": "匯出格式",
@@ -1691,12 +1721,21 @@
       "title": "API 服務",
       "accountCount": "{{count}} 個帳號",
       "baseUrl": "位址",
+      "addressKind": "位址類型",
+      "addressLocal": "本機",
+      "addressLan": "區域網路",
+      "accessScopeLabel": "存取範圍",
+      "accessScopeLocalhost": "僅本機",
+      "accessScopeLan": "區域網路",
+      "accessScopeLocalhostShort": "僅本機",
+      "accessScopeLanShort": "本機+區網",
+      "accessScopeSaveSuccess": "API 服務存取範圍已更新",
       "apiKey": "金鑰",
       "statusRunning": "執行中",
       "statusStopped": "未執行",
       "statusDisabled": "已停用",
       "emptyMembers": "目前集合沒有帳號",
-      "footerHint": "監聽本機與區域網路",
+      "footerHint": "監聽範圍：{{scope}}",
       "manageAccounts": "管理帳號",
       "rotateKey": "重設金鑰",
       "rotateConfirmMessage": "重設後目前的 API 服務金鑰會立即失效，進行中的請求可能無法使用。確認繼續嗎？",
@@ -1728,10 +1767,29 @@
         "manageMembers": "管理成員"
       },
       "entryAction": "加入 API 服務",
-      "testAction": "測試 API 服務",
-      "testSuccess": "API 服務測試成功（{{count}} 個模型）",
-      "testTimeout": "測試逾時，請確認本地服務已啟動",
+      "testAction": "測試",
+      "testDialogTitle": "測試 API 服務",
+      "testDialogDesc": "透過 Codex CLI 發出一次真實請求，驗證本機服務、密鑰與上游回應。",
+      "testProgressTitle": "正在測試服務",
+      "testProgressDesc": "正在向本機 API 服務發出真實請求，請稍候。",
+      "testOutputTitle": "回傳結果",
+      "testResultTitle": "服務檢測結果",
+      "testSuccess": "服務檢測成功：本地服務、密鑰與上游回應正常（{{model}}，{{latency}}）。如果 Codex 仍回報 502，請檢查 Codex 的 Base URL、API Key 或執行環境。",
+      "testFailureStage": "定位階段",
+      "testFailureCause": "失敗原因",
+      "testFailureSuggestion": "處理建議",
+      "testFailureStatus": "HTTP 狀態",
+      "testFailureModel": "檢測模型",
+      "testFailureDetail": "診斷詳情",
+      "testFailureCliOutput": "CLI 輸出",
+      "testFailureGatewayOutput": "網關回應",
+      "testTimeout": "真實請求檢測逾時，請檢查本地服務、代理或上游網路。",
       "testUnavailable": "目前的 API 服務位址不可用",
+      "testConnectFailed": "無法連線到 {{url}}。請確認 API 服務已啟動、連接埠未被變更或阻擋。",
+      "testAuthFailed": "服務可達，但驗證失敗：{{detail}}。請檢查 API 服務密鑰或帳號登入狀態。",
+      "testServiceUnavailable": "服務可達，但目前不可用：{{detail}}。請檢查服務是否啟用、帳號集合是否為空或帳號是否可用。",
+      "testRateLimited": "服務可達，但上游限流或額度不足：{{detail}}。",
+      "testHttpFailed": "服務可達，但請求返回 HTTP {{status}}：{{detail}}。",
       "activateAction": "啟動 API 服務",
       "activateSuccess": "已切換到 API 服務",
       "dashboardAction": "服務面板",
@@ -1746,8 +1804,8 @@
       "statsTitle": "總量統計",
       "accountStatsTitle": "依帳號統計",
       "statsEmpty": "目前還沒有統計資料",
-      "summaryMeta": "{{count}} 個帳號 · 本機/區網",
-      "summaryMetaUnconfigured": "未設定 · 本機/區網",
+      "summaryMeta": "{{count}} 個帳號 · {{scope}}",
+      "summaryMetaUnconfigured": "未設定 · {{scope}}",
       "memberTitle": "集合成員",
       "stats": {
         "requests": "總請求數",
@@ -1826,6 +1884,10 @@
         "viewFull": "查看完整統計",
         "modalTitle": "API 服務額度池",
         "empty": "尚無額度統計"
+      },
+      "oauthBinding": {
+        "desc": "可選綁定。未綁定時 API 服務會沿用原 API Key 邏輯；綁定後登入狀態使用 OAuth 帳號，Provider 使用目前 API 服務設定。",
+        "currentService": "API 服務：{{name}}"
       }
     },
     "api": {
@@ -1850,7 +1912,8 @@
         "endpoint": "供應商端點",
         "hint": "已自動填入相容的 Base URL，你仍可手動編輯。",
         "website": "網站",
-        "apiKeyPage": "API Key 頁面"
+        "apiKeyPage": "API Key 頁面",
+        "getApiKey": "取得秘鑰"
       },
       "providers": {
         "openai_official": {
@@ -1912,7 +1975,28 @@
         },
         "siliconflow": {
           "name": "SiliconFlow"
+        },
+        "cockpit_api": {
+          "name": "Cockpit Api"
         }
+      },
+      "oauthBinding": {
+        "label": "OAuth 綁定",
+        "unbound": "未綁定",
+        "action": "綁定 OAuth",
+        "actionShort": "綁定",
+        "title": "綁定 OAuth 帳號",
+        "desc": "可選綁定。未綁定時此帳號會沿用原 API Key 邏輯切換；綁定後登入狀態使用 OAuth 帳號，Provider 使用目前 API Key 帳號設定。",
+        "currentAccount": "API Key 帳號：{{name}}",
+        "selectLabel": "選擇 OAuth 帳號",
+        "empty": "尚無 OAuth 帳號，請先新增 OAuth 授權帳號。",
+        "validationRequired": "請選擇 OAuth 帳號",
+        "saveSuccess": "OAuth 綁定已更新",
+        "saveFailed": "OAuth 綁定失敗：{{error}}",
+        "switchRequiresBinding": "請先綁定 OAuth 帳號",
+        "clearAction": "解除綁定",
+        "clearSuccess": "OAuth 綁定已解除",
+        "clearFailed": "解除 OAuth 綁定失敗：{{error}}"
       }
     },
     "local": {
@@ -1932,9 +2016,10 @@
     },
     "quotaError": {
       "badge": "配額異常",
+      "refreshFailedBadge": "重新整理失敗",
       "generic": "配額重新整理失敗，請稍後再試",
       "deactivatedWorkspace": "工作區已停用，請切換帳號或重新授權",
-      "requestFailedManualRetry": "請求失敗，請手動重試：{{error}}"
+      "requestFailedManualRetry": "請檢查網路，未取得最新配額。可重新整理重試。"
     },
     "plan": {
       "free": "FREE",
@@ -2182,7 +2267,8 @@
         "collapse": "收起",
         "repairVisibility": "修復可見性",
         "restoreSessions": "還原工作階段",
-        "copySessionId": "複製會話 ID"
+        "copySessionId": "複製會話 ID",
+        "copyToInstance": "複製到實例"
       },
       "confirm": {
         "title": "移到垃圾桶",
@@ -2215,6 +2301,15 @@
         "emptyTitle": "回收桶是空的",
         "emptyDesc": "移到回收桶的工作階段會顯示在這裡。",
         "restoreAction": "還原所選工作階段"
+      },
+      "targetModal": {
+        "title": "複製到實例",
+        "hint": "會將所選工作階段補到目標實例，已存在相同 ID 的工作階段會自動略過；目標實例執行中時可能需要重新啟動後才會顯示。",
+        "targetInstance": "目標實例",
+        "pickTarget": "請選擇目標實例",
+        "selectedCount": "已選擇 {{count}} 個工作階段",
+        "existingCount": "目標已存在 {{count}} 個",
+        "confirm": "複製工作階段"
       }
     },
     "modelProviders": {
@@ -2363,6 +2458,41 @@
         "apiService": "API 服務",
         "account": "帳號"
       }
+    },
+    "accountNote": {
+      "title": "帳號備註",
+      "label": "帳號備註",
+      "desc": "為 {{account}} 填寫單獨顯示的帳號備註。",
+      "placeholder": "例如信箱、密碼、輔助信箱或其他交付備註",
+      "emptyTitle": "填寫帳號備註",
+      "short": "帳號備註",
+      "addShort": "加備註",
+      "saved": "帳號備註已儲存",
+      "saveFailed": "儲存帳號備註失敗：{{error}}"
+    },
+    "cockpitApi": {
+      "panelTitle": "Cockpit Api 服務面板",
+      "servicePanel": "服務面板",
+      "balance": "額度",
+      "requests": "請求",
+      "total": "總計",
+      "today": "今日",
+      "periods": "週期",
+      "tokens": "權杖",
+      "quotaUsed": "消耗",
+      "modelStats": "模型統計",
+      "noStats": "暫無統計",
+      "refreshHint": "點擊重新整理後會同步目前 API key 的統計。",
+      "dailyStats": "每日統計"
+    },
+    "speed": {
+      "title": "速度",
+      "standard": "標準",
+      "standardDesc": "預設速度，常規用量",
+      "fast": "快速",
+      "fastDesc": "1.5 倍速，用量增加",
+      "saveSuccess": "速度已更新",
+      "saveFailed": "儲存速度失敗：{{error}}"
     }
   },
   "githubCopilot": {
@@ -2515,6 +2645,18 @@
           "contextWindowInvalid": "上下文視窗必須是大於 0 的整數",
           "autoCompactInvalid": "自動壓縮閾值必須是大於 0 的整數"
         }
+      },
+      "appSpeed": {
+        "title": "Codex 速度",
+        "desc": "儲存為啟動速度；從本應用啟動 Codex 前會寫入。",
+        "standard": "標準",
+        "fast": "快速",
+        "launch": "重啟",
+        "loadFailed": "載入 Codex 速度失敗：{{error}}",
+        "saveSuccess": "Codex 啟動速度已儲存",
+        "saveFailed": "儲存 Codex 速度失敗：{{error}}",
+        "launchSuccess": "Codex 已按目前速度重新啟動",
+        "launchFailed": "重新啟動 Codex 失敗：{{error}}"
       }
     },
     "githubCopilot": {
@@ -2568,7 +2710,9 @@
     "cursorRefreshInterval": "配額自動更新",
     "gemini": {
       "title": "Gemini Cli 設定",
-      "appPath": "Gemini Cli 路徑"
+      "appPath": "Gemini Cli 路徑",
+      "syncWsl": "同步 WSL 設定",
+      "syncWslDesc": "切換帳號時自動覆寫 WSL 內的 .gemini 設定"
     },
     "geminiRefreshInterval": "配額自動刷新",
     "codebuddy": {
@@ -3449,37 +3593,6 @@
         "descPlatform": "CodeBuddy CN 多執行個體僅在 macOS、Windows 和 Linux 上支援。"
       }
     },
-    "checkin": {
-      "title": "每日簽到",
-      "modalTitle": "每日簽到",
-      "status": "簽到狀態",
-      "checkedIn": "已簽到",
-      "notCheckedIn": "未簽到",
-      "button": "簽到",
-      "button.loading": "簽到中...",
-      "done": "已完成",
-      "success": "簽到成功！連續簽到 {{days}} 天",
-      "failure": "簽到失敗：{{message}}",
-      "failure.network": "網路異常，請稍後重試",
-      "lastCheckin": "最後簽到：{{time}}",
-      "streak": "連續簽到 {{days}} 天",
-      "reward": "獎勵：{{reward}}",
-      "refreshStatus": "刷新狀態",
-      "checkAll": "一鍵簽到",
-      "noAccounts": "暫無帳號",
-      "querying": "查詢中...",
-      "streakDays": "{{days}} 天",
-      "streakRewardCountdown": "再簽 {{days}} 天可得大禮包",
-      "streakRewardToday": "今日可獲得大禮包！",
-      "recentDates": "近期簽到：",
-      "quotaCategory": {
-        "base": "基礎體驗包",
-        "activity": "活動贈送包",
-        "extra": "加量包",
-        "other": "其他",
-        "empty": "暫無配額資料"
-      }
-    },
     "syncFailed": "同步失敗：{{error}}",
     "syncSuccess": "已將 {{count}} 個帳號同步至 WorkBuddy",
     "syncToWorkbuddy": "同步至 WorkBuddy"
@@ -3586,6 +3699,30 @@
     },
     "quota": {
       "usedOfTotal": "{{used}} / {{total}}"
+    },
+    "checkin": {
+      "title": "每日簽到",
+      "modalTitle": "每日簽到",
+      "status": "簽到狀態",
+      "checkedIn": "已簽到",
+      "notCheckedIn": "未簽到",
+      "button": "簽到",
+      "button.loading": "簽到中...",
+      "done": "已完成",
+      "success": "簽到成功！連續簽到 {{days}} 天",
+      "failure": "簽到失敗：{{message}}",
+      "failure.network": "網路異常，請稍後重試",
+      "lastCheckin": "最後簽到：{{time}}",
+      "streak": "連續簽到 {{days}} 天",
+      "reward": "獎勵：{{reward}}",
+      "refreshStatus": "刷新狀態",
+      "checkAll": "一鍵簽到",
+      "noAccounts": "暫無帳號",
+      "querying": "查詢中...",
+      "streakDays": "{{days}} 天",
+      "streakRewardCountdown": "再簽 {{days}} 天可得大禮包",
+      "streakRewardToday": "今日可獲得大禮包！",
+      "recentDates": "近期簽到："
     }
   },
   "zed": {

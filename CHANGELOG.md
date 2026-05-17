@@ -7,6 +7,127 @@ All notable changes to Cockpit Tools will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
+## [0.23.8] - 2026-05-17
+
+### Added
+- **Codex OAuth bindings can now be cleared from the binding dialog**: API Key accounts and the Local API Service expose an explicit unbind action when an OAuth account is already linked.
+
+### Changed
+- **Codex API Key accounts and the Local API Service now treat OAuth binding as optional**: unbound entries continue to run through their original API Key flow, while bound entries keep using the selected OAuth login state with the configured provider.
+- **Codex OAuth binding copy now matches the optional behavior**: the binding dialog explains the unbound and bound runtime paths instead of presenting OAuth binding as required.
+
+---
+## [0.23.7] - 2026-05-16
+
+### Added
+- **Gemini account switching on Windows can now sync default credentials into WSL**: when switching the default Gemini account, Cockpit can copy `oauth_creds.json` and `google_accounts.json` into WSL `~/.gemini` and clean stale `gemini-credentials.json`.
+- **Modal keyboard/back interactions were expanded across account and tool dialogs**: major dialogs now support `Esc` close and explicit back actions to improve keyboard and layered-modal workflows.
+
+### Changed
+- **Gemini WSL sync now has a user-facing toggle in both Settings and Quick Settings**: the new `Sync WSL Configuration` option is enabled by default and controls whether switch-time credential sync is applied.
+- **Codex OAuth-binding account picker now uses the same subscription badge style as the main account view**: plan badges in the binding modal follow the same visual classes and plan color semantics as Codex account cards/tables.
+- **Homebrew Cask metadata has been updated after v0.23.6**: cask version/checksum references were refreshed to match the latest packaged artifact state.
+
+### Fixed
+- **GitHub Copilot switching/import now supports VS Code shared storage on Windows**: account import and token injection now read/write both legacy `User/globalStorage/state.vscdb` and shared `.vscode-shared*/sharedStorage/state.vscdb`, with shared-storage-first lookup and legacy fallback for mixed installs.
+
+---
+## [0.23.6] - 2026-05-16
+
+### Added
+- **Codex API Key accounts and the Local API Service can now bind an OAuth account**: API-key based Codex usage keeps the selected OAuth account as the login identity while the API Key account or Local API Service provides the runtime provider.
+- **Codex OAuth binding now has a searchable account picker**: the binding dialog supports search, plan/status filters, tag filters, sorting, pagination, and compact single-select rows for faster account lookup.
+
+### Changed
+- **Codex Local API Service now requires an OAuth binding before launch/test calls**: service activation and health checks use the bound OAuth login state together with the Local API Service provider settings.
+- **Codex account overview now shows OAuth binding inline for API Key and Local API Service entries**: binding status is visible from the account card, and the Local API Service preview keeps two member accounts visible.
+- **Codex OAuth binding dialog has been redesigned**: the dialog uses a more compact layout, an internal account-list scroll area, and a layered blue/teal visual treatment so the save action remains visible.
+
+---
+## [0.23.5] - 2026-05-16
+
+### Added
+- **Codex Local API Service now has a real CLI health check with actionable diagnostics**: the API Service dialog can send a real Codex CLI request through the local gateway, then show the tested model, latency, returned output, and the exact failure stage when something breaks.
+- **Codex Local API Service access scope is now configurable**: new API Service collections start as local-only, and users can explicitly switch the listener between Local Only and LAN access from the service dialog.
+
+### Changed
+- **Codex Local API Service status now describes what users can actually access**: the account card and API Service dialog show the selected access scope instead of a fixed Local/LAN label.
+- **Codex external imports now preserve API endpoint settings for Cockpit API accounts**: supported import links can carry an API Base URL so imported Codex API-key accounts are ready to use with the expected provider settings.
+- **Antigravity floating cards now show more quota context**: Antigravity account popovers can display up to three quota items instead of two.
+
+### Fixed
+- **Codex Local API Service now releases its port before applying app updates**: update restarts stop the in-process gateway before installing or relaunching, wait for the original port to become bindable, and show an in-dialog error if the service cannot be stopped.
+- **Codex account switching now keeps local sessions visible after provider changes**: switching between normal Codex accounts and API Service mode repairs affected local history visibility when the underlying provider changes.
+- **Kiro account imports no longer merge distinct accounts that only share an AWS profile ARN**: account matching now ignores ARN values as user IDs and deduplicates by real user identity, email, or refresh token.
+
+---
+## [0.23.4] - 2026-05-14
+
+### Added
+- **Codex Local API Service now exposes a LAN URL when available**: the account overview and API Service dialog can switch between the local URL and detected private LAN address, and copy the selected address for use from other devices on the same network.
+
+### Changed
+- **Codex Local API Service upstream requests now follow the app's global proxy settings**: the gateway rebuilds its upstream HTTP client when proxy settings change, honors `no_proxy`, and supports SOCKS proxy URLs.
+
+### Fixed
+- **Codex API Key provider state now matches non-OAuth local gateway behavior**: API Key providers are written without OpenAI-auth or websocket requirements, and switching back to built-in OpenAI removes managed API-key provider blocks while preserving unrelated manual providers.
+- **Codex session visibility repair now restores more hidden local threads**: SQLite repair now marks threads with a first user message as user-visible, fills missing `thread_source`, and keeps provider-only database schemas working.
+
+---
+## [0.23.3] - 2026-05-13
+
+### Added
+- **Codex official app speed can now follow accounts, the Local API Service, and managed instances**: account cards/tables, the API Service card, and Codex instance rows/forms can choose Standard or Fast, persist the selected launch speed, and write the official global state before account switches, API Service activation, and managed app launches.
+
+### Changed
+- **Codex default app launches now prepare the real launch state before restart**: managed launches can auto-detect the Codex app path when it is missing, close the default Codex process by home/process scan instead of relying only on the saved PID, and write the selected speed before starting Codex.
+- **macOS Dock and menu bar reopening now use the shared main-window recovery path**: reopening restores, unhides, activates, and focuses the main window through the same backend routine.
+
+### Fixed
+- **Windows source builds no longer fail when the previous debug executable is still running**: Tauri dev/build now clears the stale `target\debug\cockpit_tools.exe` process before Cargo replaces the debug binary.
+
+---
+## [0.23.2] - 2026-05-12
+
+### Added
+- **Codex instances now support Windows launch and process detection**: Windows can resolve Codex paths, identify managed instance processes by app user-data directory, and open Codex CLI sessions through PowerShell, Windows Terminal, or cmd.
+- **Codex session management can copy selected sessions into a target instance**: selected sessions can be restored into one Codex instance, existing session IDs are skipped, target files are backed up, and running targets are called out when a restart may be needed.
+
+### Fixed
+- **Codex API Key sessions no longer disappear when switching between different API providers**: API Key accounts now write a single runtime provider into `config.toml` with the selected base URL and Responses wire API, and built-in OAuth switching removes that runtime provider state.
+- **WebKit LocalStorage WAL files no longer grow without a startup checkpoint on macOS**: the app now checkpoints WebKit LocalStorage SQLite databases in the background on startup to prevent large WAL files from accumulating over time.
+
+---
+## [0.23.1] - 2026-05-12
+
+### Changed
+- **Republished from the mainline state to replace the withdrawn v0.23.0 build**: this release keeps the stable v0.22.22 code path and excludes the experimental PR integration that was accidentally published as v0.23.0.
+
+---
+## [0.22.22] - 2026-05-12
+
+### Added
+- **Codex model-provider management now supports new provider presets**: the account and model-provider flows can recognize and manage the newly added provider options for API-key based Codex usage.
+
+### Removed
+- **CodeBuddy CN daily check-in has been removed**: the account-page check-in entry, check-in dialog, instance-page check-in badge, frontend service calls, and desktop commands have been removed from the CodeBuddy CN path.
+
+---
+## [0.22.21] - 2026-05-10
+
+### Added
+- **Official Linux release artifacts are back in the release pipeline**: CI builds Ubuntu x86_64 and ARM64 targets, publishes AppImage/deb/rpm updater metadata, and README install guidance lists Linux packages again.
+- **Codex accounts now support standalone account notes**: account notes can be saved manually from the account overview and are stored with each Codex account record.
+
+### Changed
+- **Codex quota refresh network failures are now presented as retryable refresh notices**: request-send failures show a lighter refresh-failed badge and manual retry copy instead of implying a full quota or authorization error.
+- **Codex account cards and tables now expose note editing inline**: accounts with API Service membership show the note action beside the service badge, while every account also has a note action in its row/card controls.
+
+### Fixed
+- **Codex Local API Service now handles upstream `response.done` SSE completion events**: chat, image, and Responses adapters can read named SSE events, capture usage including cached tokens, and convert completed responses when upstream omits the `type` field in the data payload.
+- **Streaming `/v1/responses` requests now stay passthrough**: stream requests keep their upstream streaming adapter instead of being converted through the non-streaming response parser.
+
+---
 ## [0.22.20] - 2026-05-06
 
 ### Added
